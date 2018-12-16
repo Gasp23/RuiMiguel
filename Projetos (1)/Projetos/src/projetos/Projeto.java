@@ -29,7 +29,6 @@ import java.lang.NumberFormatException;
 import java.util.Collections;
 import static java.util.Collections.list;
 import java.util.InputMismatchException;
-import java.util.Random;
 import javax.swing.JFrame;
 import projetos.teste.Origem;
 import projetos.teste.Ponto;
@@ -113,10 +112,7 @@ public class Projeto implements Serializable {
 
     public static void main(String[] args) {
         Projeto projeto = new Projeto();
-        projeto.setUser(new Mestrado());
-        projeto.getUser().setCustoTotal(200);
-        projeto.algoritmo(projeto.user);
-        System.out.println(projeto.percursos.get(0));
+
         //JFrame frame = new JFrame();
         //projeto.registo();
         //projeto.login();
@@ -580,11 +576,7 @@ public class Projeto implements Serializable {
                         }
                         
                         Local l = processLocal(s[3]);
-                        System.out.println("Ponto De Interesse: ");
-                        System.out.println(p);
-                        this.pontosDeInteresse.add(p);
-                        System.out.println("Size");
-                        System.out.println(this.pontosDeInteresse.size());
+                        pontosDeInteresse.add(p);
                         l.addPoI(p);
 
                         i++;
@@ -604,7 +596,7 @@ public class Projeto implements Serializable {
             System.out.println("Ficheiro não existe.");
         }
 
-        return this.pontosDeInteresse;
+        return pontosInteresses;
     }
 
    
@@ -711,96 +703,7 @@ public class Projeto implements Serializable {
         
     }
     
-    public void algoritmo(Aluno user){
-        ArrayList<Local> pref = user.getLocais();
-        ArrayList<PontoDeInteresse> prefInteresses = user.getInteresses();
-        Random rand=new Random();
-        for(int j=0;j<10;j++){
-            ArrayList<Local> locais = new ArrayList<Local>();
-            if(0<=pref.size()&&pref.size()<=3){
-                locais.addAll(pref);
-                for (int i = 0; i < 3-pref.size(); i++) {
-                    int randomInt =rand.nextInt(this.locais.size());
-                    while(locais.contains(this.locais.get(randomInt))){
-                        randomInt =rand.nextInt(this.locais.size());
-                    }
-                    this.locais.get(randomInt).setPopularidade(this.locais.get(randomInt).getPopularidade()+1);
-                    locais.add(this.locais.get(randomInt));
-                }
-            }
-            else{
-                for (int i = 0; i <3; i++) {
-                    int randomInt =rand.nextInt(pref.size());
-                    while(locais.contains(pref.get(randomInt))){
-                        randomInt =rand.nextInt(pref.size());
-                    }
-                    locais.add(pref.get(randomInt));
-                }
-            }
-            ArrayList<PontoDeInteresse> poiFinal =new ArrayList<>();
-            for (Local local : locais) {
-                for (PontoDeInteresse poi : prefInteresses) {
-                    if(local.getPontosDeInteresse().contains(poi)){
-                        poiFinal.add(poi);
-                    }
-                }
-                int randomInt =rand.nextInt(local.getPontosDeInteresse().size());
-                while(poiFinal.contains(local.getPontosDeInteresse().get(randomInt))){
-                    randomInt =rand.nextInt(local.getPontosDeInteresse().size());
-                }
-                poiFinal.add(local.getPontosDeInteresse().get(randomInt));
-            }
-            this.percursos.add(new Viagem(locais, poiFinal));
-        }
-        filtro(user);
-    }
     
-    public void filtro(Aluno user){
-        ArrayList<Viagem> remover = new ArrayList<>();
-        ArrayList<Local> notLocais= user.getNotLocais();
-        ArrayList<PontoDeInteresse> notInteresses=user.getNotInteresses();
-        boolean remove;
-        for (Viagem v : this.percursos) {
-            remove=true;
-            if(v.getCustoTotal()>user.getCustoTotal()){
-                remover.add(v);
-            }
-            for(PontoDeInteresse interesse: v.getInteresses()){
-                if(interesse.getTipo().equals("Museu")){
-                    remove=false;
-                    break;
-                }
-            }
-            if(remove){
-                remover.add(v);
-            }
-        }
-        percursos.removeAll(remover);
-        if(percursos.size()==0){
-            System.out.println("Simulação falhou. Tentar outra vez?");
-            return;
-        }
-        for(Viagem v : this.percursos){
-            remove=false;
-            for (Local notLocal : notLocais) {
-                if(v.getLocais().contains(notLocal)){
-                    remover.add(v);
-                    remove=true;
-                    break;
-                }
-            }
-            if(remove){
-                continue;
-            }
-            for(PontoDeInteresse notInteresse: notInteresses){
-                if(v.getInteresses().contains(notInteresse)){
-                    remover.add(v);
-                    break;
-                }
-            }
-        }
-        percursos.removeAll(remover);
-    }
     
     private Local processLocal(String name) {
         // Search name
@@ -818,6 +721,5 @@ public class Projeto implements Serializable {
         locais.add(temp);
         return temp;
     }
-
 
 }

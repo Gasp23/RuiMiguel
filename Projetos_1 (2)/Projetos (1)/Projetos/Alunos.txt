@@ -1,0 +1,2 @@
+Licenciatura,Diogo,password
+Licenciatura,Rui,SteelJavaRun

@@ -29,15 +29,15 @@ import java.lang.NumberFormatException;
 import java.util.Collections;
 import static java.util.Collections.list;
 import java.util.InputMismatchException;
-import java.util.Random;
 import javax.swing.JFrame;
 import projetos.teste.Origem;
 import projetos.teste.Ponto;
 
 public class Projeto implements Serializable {
 
-    private String fileObject;
-   
+    private String fileObjectLocais;
+    private String fileObjectAlunos;
+    private String fileObjectHashmap;
     private ArrayList<Local> locais;
     private ArrayList<Aluno> alunos;
     private ArrayList<PontoDeInteresse> pontosDeInteresse;
@@ -48,28 +48,30 @@ public class Projeto implements Serializable {
 
     public Projeto() {
 
-        fileObject = "fileObject.txt";
-     
+        fileObjectLocais = "fileObjectLocais.txt";
+        fileObjectAlunos = "fileObjectAlunos.txt";
+        fileObjectHashmap = "fileObjectHashmap.txt";
         alunos = new ArrayList<>();
         locais = new ArrayList<>();
 
         percursos = new ArrayList<>();
         distanciaCusto = new HashMap<>();
-        pontosDeInteresse = new ArrayList<>();
+
         //ler os pontos de interesse do ficheiro
-        File f1 = new File(fileObject);
-       
-        if (f1.exists()) {
+        File f1 = new File(fileObjectAlunos);
+        File f2 = new File(fileObjectLocais);
+        File f3 = new File(fileObjectHashmap);
+        if (f1.exists() && f2.exists() && f3.exists()) {
 
             try {
-                FileInputStream fis = new FileInputStream(f1);
+                FileInputStream fis = new FileInputStream(f2);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 PontoDeInteresse bar = new Bar();
 
                 this.locais = (ArrayList<Local>) ois.readObject();
-                this.alunos = (ArrayList<Aluno>) ois.readObject();
-                this.distanciaCusto = (HashMap<String, Origem>) ois.readObject();
-                this.pontosDeInteresse = (ArrayList<PontoDeInteresse>) ois.readObject();
+                for (Local l : locais) {
+                    System.out.println(l);
+                }
                 ois.close();
 
             } catch (FileNotFoundException ex) {
@@ -80,7 +82,37 @@ public class Projeto implements Serializable {
                 System.out.println("Erro a converter objeto.");
             }
 
-            
+            try {
+                FileInputStream fis = new FileInputStream(f1);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                this.alunos = (ArrayList<Aluno>) ois.readObject();
+                for (Aluno a : alunos) {
+                    System.out.println(a);
+                }
+                ois.close();
+
+            } catch (FileNotFoundException ex) {
+                System.out.println("Erro a abrir ficheiro.");
+            } catch (IOException ex) {
+                System.out.println("Erro a ler ficheiro.");
+            } catch (ClassNotFoundException ex) {
+                System.out.println("Erro a converter objeto.");
+            }
+
+            try {
+                FileInputStream fis = new FileInputStream(f3);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                this.distanciaCusto = (HashMap<String, Origem>) ois.readObject();
+                System.out.println(distanciaCusto.get("Coimbra").dest.get("Aguiar").getCusto());
+                ois.close();
+
+            } catch (FileNotFoundException ex) {
+                System.out.println("Erro a abrir ficheiro.");
+            } catch (IOException ex) {
+                System.out.println("Erro a ler ficheiro.");
+            } catch (ClassNotFoundException ex) {
+                System.out.println("Erro a converter objeto.");
+            }
 
         } else {
             pontosDeInteresse = loadTextFilePI("PontosDeInteresse.txt");
@@ -101,8 +133,27 @@ public class Projeto implements Serializable {
                 System.out.println(e);
             }
 
-            SaveToObjectFile();
-            
+            try {
+                FileOutputStream fos = new FileOutputStream(f2);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(locais);
+                oos.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println("Erro a criar ficheiro.");
+            } catch (IOException ex) {
+                System.out.println("Erro a escrever para o ficheiro.");
+            }
+            SaveUsersToObjectFile();
+            try {
+                FileOutputStream fos = new FileOutputStream(f3);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(distanciaCusto);
+                oos.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println("Erro a criar ficheiro.");
+            } catch (IOException ex) {
+                System.out.println("Erro a escrever para o ficheiro.");
+            }
 
         }
 
@@ -113,10 +164,7 @@ public class Projeto implements Serializable {
 
     public static void main(String[] args) {
         Projeto projeto = new Projeto();
-        projeto.setUser(new Mestrado());
-        projeto.getUser().setCustoTotal(200);
-        projeto.algoritmo(projeto.user);
-        System.out.println(projeto.percursos.get(0));
+
         //JFrame frame = new JFrame();
         //projeto.registo();
         //projeto.login();
@@ -133,16 +181,17 @@ public class Projeto implements Serializable {
     }
 
     //----------------------------------------------------------------------
-
-    public String getFileObject() {
-        return fileObject;
+    public void setFileObjectLocais(String fileObjectLocais) {
+        this.fileObjectLocais = fileObjectLocais;
     }
 
-    public void setFileObject(String fileObject) {
-        this.fileObject = fileObject;
+    public void setFileObjectAlunos(String fileObjectAlunos) {
+        this.fileObjectAlunos = fileObjectAlunos;
     }
-  
-    
+
+    public void setFileObjectHashmap(String fileObjectHashmap) {
+        this.fileObjectHashmap = fileObjectHashmap;
+    }
 
     public void setLocais(ArrayList<Local> locais) {
         this.locais = locais;
@@ -172,7 +221,17 @@ public class Projeto implements Serializable {
         this.id = id;
     }
 
-   
+    public String getFileObjectLocais() {
+        return fileObjectLocais;
+    }
+
+    public String getFileObjectAlunos() {
+        return fileObjectAlunos;
+    }
+
+    public String getFileObjectHashmap() {
+        return fileObjectHashmap;
+    }
 
     public ArrayList<Local> getLocais() {
         return locais;
@@ -578,13 +637,9 @@ public class Projeto implements Serializable {
                             System.out.println("Abreu woudn't be proud");
                             continue;
                         }
-                        
+
                         Local l = processLocal(s[3]);
-                        System.out.println("Ponto De Interesse: ");
-                        System.out.println(p);
-                        this.pontosDeInteresse.add(p);
-                        System.out.println("Size");
-                        System.out.println(this.pontosDeInteresse.size());
+
                         l.addPoI(p);
 
                         i++;
@@ -604,10 +659,22 @@ public class Projeto implements Serializable {
             System.out.println("Ficheiro não existe.");
         }
 
+        return pontosInteresses;
+    }
+
+    private ArrayList<PontoDeInteresse> getPontosDeInteresse(String string) {
+        ArrayList<PontoDeInteresse> pontosDeInteresse = new ArrayList();
+        String[] s = string.split(";");
+
+        for (String p : s) {
+            if (p.length() == 0) {
+                continue;
+            }
+
+        }
         return this.pontosDeInteresse;
     }
 
-   
     private ArrayList<String> getCursos(String string) {
         // STRING: pref1;pref2;pref3
         ArrayList<String> cursos = new ArrayList();
@@ -651,22 +718,18 @@ public class Projeto implements Serializable {
         }
 
     }
-    
-    
-    public void SaveToObjectFile() {
-        File f1 = new File(fileObject);
+
+    public void SaveUsersToObjectFile() {
+        File f = new File(fileObjectAlunos);
         try {
-                FileOutputStream fos = new FileOutputStream(f1);
-                ObjectOutputStream oos = new ObjectOutputStream(fos);
-                oos.writeObject(locais);
-                oos.writeObject(alunos);
-                oos.writeObject(distanciaCusto);
-                oos.writeObject(pontosDeInteresse);
-                oos.close();
-            } catch (FileNotFoundException ex) {
-                System.out.println("Erro a criar ficheiro.");
-            } catch (IOException ex) {
-                System.out.println("Erro a escrever para o ficheiro.");
+            FileOutputStream fos = new FileOutputStream(f);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(alunos);
+            oos.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Erro a criar ficheiro.");
+        } catch (IOException ex) {
+            System.out.println("Erro a escrever para o ficheiro.");
         }
 
     }
@@ -691,116 +754,6 @@ public class Projeto implements Serializable {
     }
     
     
-    public int Contains2(PontoDeInteresse pontoDeInteresse){
-       
-        for(int i=0;i<user.getInteresses().size();i++){
-            if(user.getInteresses().get(i).getNome().equals(pontoDeInteresse.getNome())){
-                return 1;
-            }
-            
-        }
-        
-        for(int i=0;i<user.getNotInteresses().size();i++){
-            if(user.getNotInteresses().get(i).getNome().equals(pontoDeInteresse.getNome())){
-                return 1;
-            }
-        }
-        
-        
-        return 0;  
-        
-    }
-    
-    public void algoritmo(Aluno user){
-        ArrayList<Local> pref = user.getLocais();
-        ArrayList<PontoDeInteresse> prefInteresses = user.getInteresses();
-        Random rand=new Random();
-        for(int j=0;j<10;j++){
-            ArrayList<Local> locais = new ArrayList<Local>();
-            if(0<=pref.size()&&pref.size()<=3){
-                locais.addAll(pref);
-                for (int i = 0; i < 3-pref.size(); i++) {
-                    int randomInt =rand.nextInt(this.locais.size());
-                    while(locais.contains(this.locais.get(randomInt))){
-                        randomInt =rand.nextInt(this.locais.size());
-                    }
-                    this.locais.get(randomInt).setPopularidade(this.locais.get(randomInt).getPopularidade()+1);
-                    locais.add(this.locais.get(randomInt));
-                }
-            }
-            else{
-                for (int i = 0; i <3; i++) {
-                    int randomInt =rand.nextInt(pref.size());
-                    while(locais.contains(pref.get(randomInt))){
-                        randomInt =rand.nextInt(pref.size());
-                    }
-                    locais.add(pref.get(randomInt));
-                }
-            }
-            ArrayList<PontoDeInteresse> poiFinal =new ArrayList<>();
-            for (Local local : locais) {
-                for (PontoDeInteresse poi : prefInteresses) {
-                    if(local.getPontosDeInteresse().contains(poi)){
-                        poiFinal.add(poi);
-                    }
-                }
-                int randomInt =rand.nextInt(local.getPontosDeInteresse().size());
-                while(poiFinal.contains(local.getPontosDeInteresse().get(randomInt))){
-                    randomInt =rand.nextInt(local.getPontosDeInteresse().size());
-                }
-                poiFinal.add(local.getPontosDeInteresse().get(randomInt));
-            }
-            this.percursos.add(new Viagem(locais, poiFinal));
-        }
-        filtro(user);
-    }
-    
-    public void filtro(Aluno user){
-        ArrayList<Viagem> remover = new ArrayList<>();
-        ArrayList<Local> notLocais= user.getNotLocais();
-        ArrayList<PontoDeInteresse> notInteresses=user.getNotInteresses();
-        boolean remove;
-        for (Viagem v : this.percursos) {
-            remove=true;
-            if(v.getCustoTotal()>user.getCustoTotal()){
-                remover.add(v);
-            }
-            for(PontoDeInteresse interesse: v.getInteresses()){
-                if(interesse.getTipo().equals("Museu")){
-                    remove=false;
-                    break;
-                }
-            }
-            if(remove){
-                remover.add(v);
-            }
-        }
-        percursos.removeAll(remover);
-        if(percursos.size()==0){
-            System.out.println("Simulação falhou. Tentar outra vez?");
-            return;
-        }
-        for(Viagem v : this.percursos){
-            remove=false;
-            for (Local notLocal : notLocais) {
-                if(v.getLocais().contains(notLocal)){
-                    remover.add(v);
-                    remove=true;
-                    break;
-                }
-            }
-            if(remove){
-                continue;
-            }
-            for(PontoDeInteresse notInteresse: notInteresses){
-                if(v.getInteresses().contains(notInteresse)){
-                    remover.add(v);
-                    break;
-                }
-            }
-        }
-        percursos.removeAll(remover);
-    }
     
     private Local processLocal(String name) {
         // Search name
@@ -818,6 +771,5 @@ public class Projeto implements Serializable {
         locais.add(temp);
         return temp;
     }
-
 
 }

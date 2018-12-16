@@ -1,0 +1,2 @@
+Coimbra,Aguiar,200,100
+Aguiar,Coimbra,200,100

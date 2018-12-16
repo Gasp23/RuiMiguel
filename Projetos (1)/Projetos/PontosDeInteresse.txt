@@ -1,0 +1,5 @@
+Bar,Bar de Aguiar,10;0;20;0,Aguiar,1000,10
+Aquatico,Zoomarine,0;0;0;0,Aguiar,20,a,true,30
+Museu,Dio's mansion,0;40;0;0,Egypt,10000,presos de Aguiar
+Tematico,Parque de Aguiar,0;0;0;0,Aguiar,10000,presos de Aguiar,true,10,20
+Universidade,sikdid,9;0;20;0,Coimbra,0,c1;c2
